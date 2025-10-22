@@ -1,0 +1,104 @@
+import java.applet.Applet;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+
+/**
+ * BouncingTextApplet - A nostalgic Java Applet that animates bouncing text
+ * This demonstrates classic applet programming from the early web era
+ */
+public class BouncingTextApplet extends Applet implements Runnable {
+    private Thread animationThread;
+    private String displayText = "John Doe"; // Replace with your name
+    private int xPosition = 0;
+    private int yPosition = 50;
+    private int textWidth = 0;
+    private boolean running = false;
+    
+    // Animation properties
+    private int speed = 5;
+    private int direction = 1; // 1 for right, -1 for left
+    
+    /**
+     * Initialize the applet - sets size, background, and calculates text dimensions
+     */
+    public void init() {
+        // Set applet size and background color
+        setSize(600, 200);
+        setBackground(Color.BLACK);
+        
+        // Calculate approximate text width
+        textWidth = displayText.length() * 10;
+    }
+    
+    /**
+     * Start the animation thread when applet becomes visible
+     */
+    public void start() {
+        if (animationThread == null) {
+            animationThread = new Thread(this);
+            running = true;
+            animationThread.start();
+        }
+    }
+    
+    /**
+     * Stop the animation thread when applet is no longer visible
+     */
+    public void stop() {
+        running = false;
+        if (animationThread != null) {
+            animationThread = null;
+        }
+    }
+    
+    /**
+     * Main animation loop - runs in a separate thread
+     */
+    public void run() {
+        while (running) {
+            // Update text position
+            xPosition += speed * direction;
+            
+            // Check for collision with right edge
+            if (xPosition + textWidth >= getWidth()) {
+                direction = -1; // Reverse direction
+                xPosition = getWidth() - textWidth; // Prevent going beyond edge
+            }
+            
+            // Check for collision with left edge
+            if (xPosition <= 0) {
+                direction = 1; // Reverse direction
+                xPosition = 0; // Reset to left edge
+            }
+            
+            // Request repaint
+            repaint();
+            
+            // Pause the thread to control animation speed
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                System.out.println("Animation thread interrupted");
+            }
+        }
+    }
+    
+    /**
+     * Paint method - called automatically to draw the applet content
+     * @param g The Graphics object for drawing
+     */
+    public void paint(Graphics g) {
+        // Set text color and font
+        g.setColor(Color.GREEN);
+        g.setFont(new Font("Courier", Font.BOLD, 24));
+        
+        // Draw the bouncing text
+        g.drawString(displayText, xPosition, yPosition);
+        
+        // Draw applet info
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.PLAIN, 12));
+        g.drawString("Nostalgic Java Applet - Text Position: " + xPosition, 10, getHeight() - 20);
+    }
+}
